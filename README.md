@@ -26,14 +26,13 @@ A deep dive into the building blocks of voice agents:
 - Text-to-Speech model evaluation
 - Framework comparison and recommendations
 
-### Part 2: Pipecat Architecture & LLM Integration *(Coming Soon)*
+### [Part 2: Pipecat Architecture & Hello world in pipecat](blog/2025%20Voice%20AI%20Guide%20How%20to%20Make%20Your%20Own%20Real-Time%20Voice%20Agent%20(Part-2).md)
 
 Building your first voice agent with Pipecat:
 - Understanding Pipecat's streaming architecture
 - Setting up the development environment
 - Integrating STT, LLM, and TTS components
 - Creating a basic conversational flow
-- Handling interruptions and turn detection
 
 ### Part 3: Memory & RAG Integration *(Coming Soon)*
 
