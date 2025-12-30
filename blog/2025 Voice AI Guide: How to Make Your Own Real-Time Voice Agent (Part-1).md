@@ -1,6 +1,13 @@
-Over the past few months I’ve been building a fully open-source voice agent, exploring the stack end-to-end and learning a ton along the way. Now I’m ready to share everything I discovered.  
+---
+title: "2025 Voice AI Guide: How to Make Your Own Real-Time Voice Agent (Part-1)"
+date: 2025-12-21T10:36:47.4747+05:30
+draft: true
+tags:
+---
 
-The best part? In 2025 you actually **can** build one yourself. With today’s open-source models and frameworks you can piece together a real-time voice agent that listens, reasons, and talks back almost like a human  without relying on closed platforms.  
+Over the past few months I’ve been building a fully open-source voice agent, exploring the stack end-to-end and learning a ton along the way. Now I’m ready to share everything I discovered.
+
+The best part? In 2025 you actually **can** build one yourself. With today’s open-source models and frameworks you can piece together a real-time voice agent that listens, reasons, and talks back almost like a human without relying on closed platforms.
 
 Let’s walk through the building blocks, step by step.
 
@@ -12,28 +19,30 @@ At a high level, a modern voice agent looks like this:
 
 Pretty simple on paper but each step has its own challenges. Let’s dig deeper.
 
-##  Speech-to-Text (STT)
+## Speech-to-Text (STT)
 
 Speech is a **continuous audio wave** it doesn’t naturally have clear sentence boundaries or pauses. That’s where **Voice Activity Detection (VAD)** comes in:
 
 - **VAD (Voice Activity Detection):** Detects when the user starts and stops talking. Without it, your bot either cuts you off too soon or stares at you blankly.
 
 Once the boundaries are clear, the audio is passed into an **STT model** for transcription.
+
 #### Popular VAD
 
-| Factor                | **Silero VAD**                                                                                                                             | **WebRTC VAD**                                                                                         | **TEN VAD**                                                                                                                               | **Yamnet VAD**                           | **Cobra (Picovoice)**                                                           |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------- |
-| **Accuracy**          | State-of-the-art, >95% in multi-noise[](https://www.qed42.com/insights/voice-activity-detection-in-text-to-speech-how-real-time-vad-works) | Good for silence/non-silence; lower speech/noise discrimination                                        | High, lower false positives than WebRTC/Silero[](https://www.communeify.com/en/blog/ten-vad-webrtc-killer-opensource-ai-voice-detection/) | Good, multi-class capable                | Top-tier (see Picovoice benchmarks)[](https://picovoice.ai/docs/benchmark/vad/) |
-| **Latency**           | <1ms per 30+ms chunk (CPU/GPU/ONNX)[](https://github.com/snakers4/silero-vad)                                                              | 10-30ms frame decision, ultra low-lag[](https://github.com/wiseman/py-webrtcvad/issues/68)             | 2-5ms (real-time capable)                                                                                                                 | 5–10ms/classify                          | 5–10ms/classify                                                                 |
-| **Chunk Size**        | 30, 60, 100ms selector                                                                                                                     | 10–30ms                                                                                                | 20ms, 40ms custom                                                                                                                         | 30-50ms                                  | 30-50ms                                                                         |
-| **Noise Robustness**  | Excellent, trained on 100+ noises[](https://github.com/snakers4/silero-vad)                                                                | Poor for some background noise/overlapping speech[](https://github.com/wiseman/py-webrtcvad/issues/68) | Excellent                                                                                                                                 | Moderate                                 | Excellent                                                                       |
-| **Language Support**  | 6000+ languages/no domain restriction[](https://github.com/snakers4/silero-vad)                                                            | Language-agnostic, good for basic speech/silence                                                       | Language-agnostic                                                                                                                         | Multi-language possible                  | Language-agnostic                                                               |
-| **Footprint**         | ~2MB JIT, <1MB ONNX, minimal CPU/edge[](https://github.com/snakers4/silero-vad)                                                            | ~158KB binary, extremely light                                                                         | ~400KB[](https://www.reddit.com/r/selfhosted/comments/1lvdfaq/found_a_really_wellmade_opensource_vad_great/)                              | ~2MB (.tflite format)                    | Small, edge-ready                                                               |
-| **Streaming Support** | Yes, supports real-time pipelines                                                                                                          | Yes, designed for telecom/audio streams                                                                | Yes, real-time                                                                                                                            | Yes                                      | Yes                                                                             |
-| **Integration**       | Python, ONNX, PyTorch, Pipecat, edge/IoT data[](https://github.com/snakers4/silero-vad)                                                    | C/C++/Python, embedded/web/mobile                                                                      | Python, C++, web                                                                                                                          | TensorFlow Lite APIs                     | Python, C, web, WASM                                                            |
-| **Licensing**         | MIT (commercial/edge/distribution OK)[](https://github.com/snakers4/silero-vad)                                                            | BSD (very permissive)                                                                                  | Apache 2.0, open                                                                                                                          | Apache 2.0                               | Apache 2.0                                                                      |
+| Factor                | **Silero VAD**                                                                                                                             | **WebRTC VAD**                                                                                         | **TEN VAD**                                                                                                                               | **Yamnet VAD**            | **Cobra (Picovoice)**                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------- |
+| **Accuracy**          | State-of-the-art, >95% in multi-noise[](https://www.qed42.com/insights/voice-activity-detection-in-text-to-speech-how-real-time-vad-works) | Good for silence/non-silence; lower speech/noise discrimination                                        | High, lower false positives than WebRTC/Silero[](https://www.communeify.com/en/blog/ten-vad-webrtc-killer-opensource-ai-voice-detection/) | Good, multi-class capable | Top-tier (see Picovoice benchmarks)[](https://picovoice.ai/docs/benchmark/vad/) |
+| **Latency**           | <1ms per 30+ms chunk (CPU/GPU/ONNX)[](https://github.com/snakers4/silero-vad)                                                              | 10-30ms frame decision, ultra low-lag[](https://github.com/wiseman/py-webrtcvad/issues/68)             | 2-5ms (real-time capable)                                                                                                                 | 5–10ms/classify           | 5–10ms/classify                                                                 |
+| **Chunk Size**        | 30, 60, 100ms selector                                                                                                                     | 10–30ms                                                                                                | 20ms, 40ms custom                                                                                                                         | 30-50ms                   | 30-50ms                                                                         |
+| **Noise Robustness**  | Excellent, trained on 100+ noises[](https://github.com/snakers4/silero-vad)                                                                | Poor for some background noise/overlapping speech[](https://github.com/wiseman/py-webrtcvad/issues/68) | Excellent                                                                                                                                 | Moderate                  | Excellent                                                                       |
+| **Language Support**  | 6000+ languages/no domain restriction[](https://github.com/snakers4/silero-vad)                                                            | Language-agnostic, good for basic speech/silence                                                       | Language-agnostic                                                                                                                         | Multi-language possible   | Language-agnostic                                                               |
+| **Footprint**         | ~2MB JIT, <1MB ONNX, minimal CPU/edge[](https://github.com/snakers4/silero-vad)                                                            | ~158KB binary, extremely light                                                                         | ~400KB[](https://www.reddit.com/r/selfhosted/comments/1lvdfaq/found_a_really_wellmade_opensource_vad_great/)                              | ~2MB (.tflite format)     | Small, edge-ready                                                               |
+| **Streaming Support** | Yes, supports real-time pipelines                                                                                                          | Yes, designed for telecom/audio streams                                                                | Yes, real-time                                                                                                                            | Yes                       | Yes                                                                             |
+| **Integration**       | Python, ONNX, PyTorch, Pipecat, edge/IoT data[](https://github.com/snakers4/silero-vad)                                                    | C/C++/Python, embedded/web/mobile                                                                      | Python, C++, web                                                                                                                          | TensorFlow Lite APIs      | Python, C, web, WASM                                                            |
+| **Licensing**         | MIT (commercial/edge/distribution OK)[](https://github.com/snakers4/silero-vad)                                                            | BSD (very permissive)                                                                                  | Apache 2.0, open                                                                                                                          | Apache 2.0                | Apache 2.0                                                                      |
 
- [Silero VAD](https://github.com/snakers4/silero-vad) is the gold standard and pipecat has builtin support so I have choosen that :
+[Silero VAD](https://github.com/snakers4/silero-vad) is the gold standard and pipecat has builtin support so I have choosen that :
+
 - Sub-1ms per chunk on CPU
 - Just 2MB in size
 - Handles 6000+ languages
@@ -45,9 +54,9 @@ Once the boundaries are clear, the audio is passed into an **STT model** for tra
 What are thing we need focus on choosing STT for voice agent
 
 - **Accuracy**:
-	- **Word Error Rate (WER):** Measures transcription mistakes (lower is better).
-		- Example: WER 5% means 5 mistakes per 100 words.
-	- **Sentence-level correctness:** Some models may get individual words right but fail on sentence structure.
+  - **Word Error Rate (WER):** Measures transcription mistakes (lower is better).
+    - Example: WER 5% means 5 mistakes per 100 words.
+  - **Sentence-level correctness:** Some models may get individual words right but fail on sentence structure.
 - **Multilingual support:** If your users speak multiple languages, check language coverage.
 - **Noise tolerance:** Can it handle background noise, music, or multiple speakers?
 - **Accent/voice variation handling:** Works across accents, genders, and speech speeds.
@@ -55,7 +64,7 @@ What are thing we need focus on choosing STT for voice agent
 - **Streaming:** Most STT models work in batch mode (great for YouTube captions, bad for live conversations). For real-time agents, we need streaming output words should appear _while you’re still speaking_.
 - **Low Latency:** Even 300 500ms delays feel unnatural. Target **sub-second responses**.
 
-Whisper often comes first to mind for most people when discussing speech-to-text because it has a large community, numerous variants, and is backed by OpenAI. 
+Whisper often comes first to mind for most people when discussing speech-to-text because it has a large community, numerous variants, and is backed by OpenAI.
 
 **OpenAI Whisper Family**
 
@@ -64,10 +73,10 @@ Whisper often comes first to mind for most people when discussing speech-to-text
 - **[Distil-Whisper](https://github.com/huggingface/distil-whisper)** — Lightweight for resource-constrained environments
 - **[WhisperX](https://github.com/m-bain/whisperX)** — Enhanced timestamps and speaker diarization
 
- **NVIDIA** also offers some interesting STT models, though I haven’t tried them yet since Whisper works well for my use case. I’m just listing them here for you to explore:
- 
- - [Canary Qwen 2.5B](https://huggingface.co/nvidia/canary-1b) — Leading performance, 5.63% WER
- - [Parakeet TDT 0.6B V2](https://huggingface.co/nvidia/parakeet-tdt-0.6b) — Ultra-fast inference (3,386 RTFx)
+  **NVIDIA** also offers some interesting STT models, though I haven’t tried them yet since Whisper works well for my use case. I’m just listing them here for you to explore:
+
+- [Canary Qwen 2.5B](https://huggingface.co/nvidia/canary-1b) — Leading performance, 5.63% WER
+- [Parakeet TDT 0.6B V2](https://huggingface.co/nvidia/parakeet-tdt-0.6b) — Ultra-fast inference (3,386 RTFx)
 
 Here the comparsion table
 
@@ -83,6 +92,7 @@ Here the comparsion table
 After testing, my pick is **FastWhisper**, an optimized inference engine for Whisper.
 
 **Key Advantages:**
+
 - **12.5× faster** than original Whisper
 - **3× faster** than Faster-Whisper with batching
 - **Sub-200ms latency** possible with proper tuning
@@ -91,11 +101,11 @@ After testing, my pick is **FastWhisper**, an optimized inference engine for Whi
 
 It’s built in **C++ + CTranslate2**, supports batching, and integrates neatly with **VAD**.
 
-For more you can check [Speech to Text AI Model & Provider Leaderboard](https://artificialanalysis.ai/speech-to-text) 
+For more you can check [Speech to Text AI Model & Provider Leaderboard](https://artificialanalysis.ai/speech-to-text)
 
 ### Large Language Model (LLM)
 
-Once speech is transcribed, the text goes into an **LLM  the “brain” of your agent**.
+Once speech is transcribed, the text goes into an **LLM the “brain” of your agent**.
 
 What we want in an LLM for voice agents:
 
@@ -113,6 +123,7 @@ What we want in an LLM for voice agents:
 - **Tool calling support** — built-in function execution
 
 **Others**
+
 - [Mistral 7B](https://huggingface.co/mistralai/Mistral-7B-v0.1) / **Mixtral 8x7B** — Efficient and competitive
 - [Qwen 2.5](https://huggingface.co/Qwen/Qwen2.5-72B-Instruct) — Strong multilingual support
 - [Google Gemma](https://huggingface.co/google/gemma-2-27b-it) — Lightweight but solid
@@ -120,18 +131,20 @@ What we want in an LLM for voice agents:
 #### My Choice: Llama 3.3 70B Versatile
 
 Why?
+
 - **Large context window** → keeps conversations coherent
 - **Tool use** built-in
 - Widely supported in the open-source community
 
-##  Text-to-Speech (TTS)
+## Text-to-Speech (TTS)
 
-Now the agent needs to **speak back**  and this is where quality can make or break the experience.
+Now the agent needs to **speak back** and this is where quality can make or break the experience.
 
 A poor TTS voice instantly ruins immersion. The key requirements are:
-- **Low latency**  avoid awkward pauses
-- **Natural speech**  no robotic tone
-- **Streaming output**  start speaking mid-sentence
+
+- **Low latency** avoid awkward pauses
+- **Natural speech** no robotic tone
+- **Streaming output** start speaking mid-sentence
 
 #### Open-Source TTS Models I’ve Tried
 
@@ -157,6 +170,7 @@ There are plenty of open-source TTS models available. Here’s a snapshot of the
 | **Documentation / Community**   | Active, rich demos, open source, growing[](https://github.com/hexgrad/kokoro)                                               | Good docs, quickly growing                     | Very large (Coqui), strong docs                      | Medium but positive community          | Medium, active research group              |
 | **License**                     | Apache 2.0 (commercial OK)                                                                                                  | Commercial/Proprietary use may require license | LGPL-3.0, open (see repo)                            | See repo, mostly permissive            | Apache 2.0                                 |
 | **Pretrained Voices / Demos**   | Yes (multiple voices, demos available)[](https://www.digitalocean.com/community/tutorials/best-text-to-speech-models)       | Yes, continually adding more                   | Yes, huge library, instant demo                      | Yes                                    | Yes (many public models on Hugging Face)   |
+
 #### Why I Chose **Kokoro-82M**
 
 **Key Advantages:**
@@ -173,7 +187,7 @@ There are plenty of open-source TTS models available. Here’s a snapshot of the
 - Less expressive than XTTS-v2
 - Relatively new model with a smaller community
 
-You can also check out my minimal **[Kokoro-FastAPI server](https://github.com/programmerraja/Kokoro-FastAPI)** to experiment with it:  
+You can also check out my minimal **[Kokoro-FastAPI server](https://github.com/programmerraja/Kokoro-FastAPI)** to experiment with it:
 
 ## Speech-to-Speech Models
 
@@ -189,7 +203,6 @@ Some notable models in this space include:
 
 - **[AudioLM (Google Research)](https://research.google/blog/audiolm-a-language-modeling-approach-to-audio-generation/)**: Leverages **language modeling on audio tokens** to generate high-quality speech continuation and synthesis.
 
-
 Among these, I’ve primarily worked with **Moshi**. I’ve implemented it on a **FastAPI server with streaming support**, which allows you to test and interact with it in real-time. You can explore the FastAPI implementation here: [FastAPI + Moshi GitHub](https://github.com/programmerraja/FastAPI_Moshi).
 
 ## Framework (The Glue)
@@ -199,22 +212,26 @@ Finally, you need something to tie all the pieces together: **streaming audio, m
 **Open-Source Frameworks**
 
 **[Pipecat](https://github.com/pipecat-ai/pipecat)**
+
 - Purpose-built for **voice-first agents**
 - **Streaming-first** (ultra-low latency)
 - Modular design — swap models easily
 - Active community
 
 **[Vocode](https://github.com/vocodedev/vocode-python)**
+
 - Developer-friendly, good docs
 - Direct telephony integration
 - Smaller community, less active
 
 **[LiveKit Agents](https://github.com/livekit/agents)**
+
 - Based on WebRTC
 - Supports voice, video, text
 - Self-hosting options
 
 **Traditional Orchestration**
+
 - **LangChain** — great for docs, weak at streaming
 - **LlamaIndex** — RAG-focused, not optimized for voice
 - **Custom builds** — total control, but high overhead
@@ -228,25 +245,27 @@ Finally, you need something to tie all the pieces together: **streaming audio, m
 - Built-in interruption handling
 
 **Production Ready**
+
 - Sub-500ms latency achievable
 - Efficient for long-running agents
 - Excellent docs + examples
 - Strong, growing community
 
 **Real-World Performance**
+
 - ~500ms voice-to-voice latency in production
 - Works with Twilio + phone systems
 - Supports multi-agent orchestration
 - Scales to thousands of concurrent users
 
-| Feature             | Pipecat     | Vocode      | LiveKit | LangChain |
-| ------------------- | ----------- | ----------- | ------- | --------- |
-| Voice-First Design  | ✅           | ✅           | ⚠️      | ❌         |
-| Real-Time Streaming | ✅           | ✅           | ✅       | ❌         |
-| Vendor Neutral      | ✅           | ✅           | ✅       | ⚠️        |
-| Turn Detection      | ✅ Smart V2  | ⚠️ Basic    | ✅       | ❌         |
-| Community Activity  | ✅ High      | ⚠️ Moderate | ✅ High  | ✅ High    |
-| Learning Curve      | ⚠️ Moderate | ⚠️ Moderate | ❌ Steep | ✅ Easy    |
+| Feature             | Pipecat     | Vocode      | LiveKit  | LangChain |
+| ------------------- | ----------- | ----------- | -------- | --------- |
+| Voice-First Design  | ✅          | ✅          | ⚠️       | ❌        |
+| Real-Time Streaming | ✅          | ✅          | ✅       | ❌        |
+| Vendor Neutral      | ✅          | ✅          | ✅       | ⚠️        |
+| Turn Detection      | ✅ Smart V2 | ⚠️ Basic    | ✅       | ❌        |
+| Community Activity  | ✅ High     | ⚠️ Moderate | ✅ High  | ✅ High   |
+| Learning Curve      | ⚠️ Moderate | ⚠️ Moderate | ❌ Steep | ✅ Easy   |
 
 ## Lead to Next Part
 
@@ -258,14 +277,7 @@ Stay tuned the next guide will turn all these building blocks into a working, re
 
 I’ve created a **GitHub repository** **[VoiceAgentGuide](https://github.com/programmerraja/VoiceAgentGuide)** for this series, where we can store our notes and related resources. Don’t forget to **check it out** and share your **feedback**. Feel free to **contribute or add missing content** by submitting a pull request (PR).
 
-
 ## Resources
+
 - [Voice AI & Voice Agents An Illustrated Primer](https://voiceaiandvoiceagents.com/)
-- 
-
-
-
-
-
-
-
+-
