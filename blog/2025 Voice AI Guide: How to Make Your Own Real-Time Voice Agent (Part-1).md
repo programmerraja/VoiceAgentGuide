@@ -1,7 +1,7 @@
 ---
 title: "2025 Voice AI Guide: How to Make Your Own Real-Time Voice Agent (Part-1)"
 date: 2025-12-21T10:36:47.4747+05:30
-draft: true
+draft: false
 tags:
 ---
 

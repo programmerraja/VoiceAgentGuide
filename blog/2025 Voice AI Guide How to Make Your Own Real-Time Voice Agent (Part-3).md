@@ -1,7 +1,7 @@
 ---
 title: "2025 Voice AI Guide: How to Make Your Own Real-Time Voice Agent (Part-3)"
 date: 2025-12-21T10:36:47.4747+05:30
-draft: true
+draft: false
 tags:
 ---
 
@@ -438,7 +438,6 @@ The TTS server receives a stream of text tokens from the LLM. It immediately sta
 **How it works**:
 
 1. **Token Buffering**: TTS receives token #1 from LLM. Checks if it's punctuation.
-
    - If no punctuation: buffer and wait for more tokens.
    - If punctuation or buffer size > 64 tokens: proceed.
 
