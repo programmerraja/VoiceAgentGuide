@@ -86,3 +86,9 @@ This guide is a living resource. Feel free to:
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## ⭐ Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=programmerraja/VoiceAgentGuide&type=date&legend=top-left)](https://www.star-history.com/#programmerraja/VoiceAgentGuide&type=date&legend=top-left)
+
+
