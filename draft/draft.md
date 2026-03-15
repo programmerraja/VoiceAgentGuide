@@ -7,3 +7,6 @@ ADd buy me coffe at last.
 Need to find a way to latency in call eval.k
 
 https://www.mmntm.net/articles/voice-latency-threshold
+
+
+look forward to something or expect that it will happen soon. 
