@@ -1,0 +1,2389 @@
+{
+  "version": 1,
+  "updated": "2026-08-15",
+  "nodeTypes": [
+    {
+      "id": "domain",
+      "label": "Domain",
+      "color": "#7c9cff"
+    },
+    {
+      "id": "concept",
+      "label": "Concept",
+      "color": "#59c2a4"
+    },
+    {
+      "id": "model",
+      "label": "Model",
+      "color": "#e0a33e"
+    },
+    {
+      "id": "provider",
+      "label": "Provider",
+      "color": "#d8709b"
+    },
+    {
+      "id": "tool",
+      "label": "Tool",
+      "color": "#9b8cf5"
+    },
+    {
+      "id": "metric",
+      "label": "Metric",
+      "color": "#6fb7e0"
+    },
+    {
+      "id": "pattern",
+      "label": "Pattern",
+      "color": "#c98b62"
+    },
+    {
+      "id": "cost-reduction",
+      "label": "Cost reduction",
+      "color": "#7c9cff"
+    },
+    {
+      "id": "finetune",
+      "label": "Finetune",
+      "color": "#59c2a4"
+    }
+  ],
+  "edgeTypes": [
+    {
+      "id": "part_of",
+      "label": "part of",
+      "inverse": "contains"
+    },
+    {
+      "id": "precedes",
+      "label": "precedes",
+      "inverse": "follows"
+    },
+    {
+      "id": "uses",
+      "label": "uses",
+      "inverse": "used by"
+    },
+    {
+      "id": "alternative_to",
+      "label": "alternative to",
+      "inverse": "alternative to"
+    },
+    {
+      "id": "tradeoff_vs",
+      "label": "tradeoff vs",
+      "inverse": "tradeoff vs"
+    },
+    {
+      "id": "measured_by",
+      "label": "measured by",
+      "inverse": "measures"
+    },
+    {
+      "id": "related_to",
+      "label": "related to",
+      "inverse": "related to"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "voice-agent",
+      "type": "domain",
+      "title": "Voice Agent",
+      "summary": "A real-time system that listens, thinks, and speaks back in a conversation.",
+      "tags": [
+        "root"
+      ],
+      "notes": "The A-to-Z map. Everything in this encyclopedia hangs off the pipeline stages below.\n\nStages: **turn detection -> STT -> LLM -> TTS -> transport**, with eval and deployment wrapped around them.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "vad",
+      "type": "domain",
+      "title": "Voice Activity Detection",
+      "summary": "Deciding when the user started and stopped speaking.",
+      "tags": [
+        "pipeline"
+      ],
+      "notes": "Gatekeeper of the pipeline. Bad VAD shows up as the agent talking over people or waiting too long before replying.\n\n- Works on short audio frames and decides whether each frame contains speech. Adjacent speech frames are grouped into a segment before going downstream.\n- A simple detector can use short-time energy and zero-crossing rate. Neural detectors handle messy rooms better, but cost more and can still fail on music, crosstalk and breathing.\n- Quality is not just classification accuracy. In an agent, the visible failures are clipped first words, long waits, and the agent speaking over the caller.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "stt",
+      "type": "domain",
+      "title": "Speech-to-Text",
+      "summary": "Turning captured audio into text for the LLM.",
+      "tags": [
+        "pipeline"
+      ],
+      "notes": "Selection criteria I care about: WER, real-time factor, streaming support, noise robustness.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "llm",
+      "type": "domain",
+      "title": "Large Language Model",
+      "summary": "The reasoning layer that decides what the agent says and does.",
+      "tags": [
+        "pipeline"
+      ],
+      "notes": "For voice, time-to-first-token matters more than raw throughput; the user hears the pause.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "tts",
+      "type": "domain",
+      "title": "Text-to-Speech",
+      "summary": "Synthesising the agent's reply as audio.",
+      "tags": [
+        "pipeline"
+      ],
+      "notes": "Streaming synthesis is what makes a reply feel instant, even when the full sentence takes longer.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "speech-to-speech",
+      "type": "domain",
+      "title": "Speech-to-Speech",
+      "summary": "End-to-end models that skip the separate STT/LLM/TTS stages.",
+      "tags": [
+        "pipeline"
+      ],
+      "notes": "Fewer hops means lower latency and better prosody, at the cost of control over each stage.\n\n- A cascaded agent gives a transcript, interchangeable providers and control over each stage — easier to inspect and repair.\n- An end-to-end speech model can preserve tone and overlap while removing network hops, but it is harder to constrain, evaluate and debug.\n- Not simply old versus new. The right choice depends on whether control or natural conversational behaviour matters more for the product.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "transport",
+      "type": "domain",
+      "title": "Transport",
+      "summary": "Moving audio between the user and the agent in real time.",
+      "tags": [
+        "infra"
+      ],
+      "notes": "WebRTC for browsers and apps, SIP for phones. Transport choice sets the latency floor.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "telephony",
+      "type": "domain",
+      "title": "Telephony",
+      "summary": "Connecting the agent to the phone network.",
+      "tags": [
+        "infra"
+      ],
+      "notes": "Narrowband audio, jitter, and DTMF handling make phone calls harder than a browser mic.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "turn-taking",
+      "type": "concept",
+      "title": "Turn Taking",
+      "summary": "Deciding whose turn it is to speak.",
+      "tags": [
+        "ux"
+      ],
+      "notes": "End-of-turn detection is the hard part: a pause mid-thought is not the same as a finished sentence.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "wer",
+      "type": "metric",
+      "title": "Word Error Rate",
+      "summary": "Transcription accuracy measured against a reference transcript.",
+      "tags": [
+        "stt"
+      ],
+      "notes": "Varies a lot by model size, accent, and language. Benchmark on your own audio, not just published numbers.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "rtf",
+      "type": "metric",
+      "title": "Real-Time Factor",
+      "summary": "Processing time divided by audio duration.",
+      "tags": [
+        "latency"
+      ],
+      "notes": "Below 1.0 means faster than real time. For live agents you want a lot of headroom, not just under 1.\n\n- Processing time divided by audio duration. Below 1 means faster than real time.\n- For a live agent, merely staying below 1 is not enough. The front end needs headroom for concurrent calls, jitter and the rest of the pipeline.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "ttft",
+      "type": "metric",
+      "title": "Time to First Token",
+      "summary": "How long the LLM takes to emit its first token.",
+      "tags": [
+        "llm",
+        "latency"
+      ],
+      "notes": "The metric that decides whether the agent feels snappy. Total tokens per second matters less once TTS is streaming.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "mos",
+      "type": "metric",
+      "title": "Mean Opinion Score",
+      "summary": "Human rating of synthesised speech quality.",
+      "tags": [
+        "tts"
+      ],
+      "notes": "Subjective, but still the best proxy for whether a voice sounds acceptable.\n\n- Still the clearest answer to “would a person accept this voice?”, but slow and rater-dependent.\n- Automated scores such as PESQ are useful for comparing signal degradation, not for declaring that synthetic speech sounds human.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "silero-vad",
+      "type": "model",
+      "title": "Silero VAD",
+      "summary": "Small neural voice activity detector.",
+      "tags": [
+        "vad"
+      ],
+      "notes": "Light enough to run per-frame on CPU alongside everything else.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "webrtc-vad",
+      "type": "tool",
+      "title": "WebRTC VAD",
+      "summary": "Classic signal-processing based voice activity detector.",
+      "tags": [
+        "vad"
+      ],
+      "notes": "Very cheap and predictable, weaker in noisy environments than neural detectors.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "whisper",
+      "type": "model",
+      "title": "Whisper",
+      "summary": "Open-source multilingual speech recognition model family.",
+      "tags": [
+        "stt"
+      ],
+      "notes": "Strong accuracy baseline. Vanilla implementation is not built for streaming.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "deepgram",
+      "type": "provider",
+      "title": "Deepgram",
+      "summary": "Hosted streaming speech recognition; Flux family also covers conversation-native TTS.",
+      "tags": [
+        "stt",
+        "tts"
+      ],
+      "notes": "",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "llama-3-3-70b",
+      "type": "model",
+      "title": "Llama 3.3 70B",
+      "summary": "Open-weight instruction-tuned model used as the agent brain.",
+      "tags": [
+        "llm"
+      ],
+      "notes": "What I used in the series, served through a fast hosted endpoint rather than locally.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "groq",
+      "type": "provider",
+      "title": "Groq",
+      "summary": "Low-latency hosted inference focused on open models.",
+      "tags": [
+        "llm",
+        "host"
+      ],
+      "notes": "- Among the **fastest** hosts for open models (with Cerebras for Gemma-class).\n- Re-benchmark periodically — latency rankings drift.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "ollama",
+      "type": "tool",
+      "title": "Ollama",
+      "summary": "Local model runner with a simple install and API.",
+      "tags": [
+        "llm",
+        "local"
+      ],
+      "notes": "Easiest way to get a local LLM running while prototyping.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "vllm",
+      "type": "tool",
+      "title": "vLLM",
+      "summary": "High-throughput inference engine for serving LLMs.",
+      "tags": [
+        "llm",
+        "serving"
+      ],
+      "notes": "Better fit than Ollama once you need concurrency across many calls.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "piper",
+      "type": "model",
+      "title": "Piper",
+      "summary": "Lightweight local neural TTS.",
+      "tags": [
+        "tts"
+      ],
+      "notes": "Small CPU model; good for **flow/logic testing**, not necessarily prod quality. Real cost cut vs premium hosted voices when accents pass QA.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "xtts-v2",
+      "type": "model",
+      "title": "XTTS-v2",
+      "summary": "Open TTS model with voice cloning support.",
+      "tags": [
+        "tts"
+      ],
+      "notes": "Good expressiveness and cloning, heavier than the small models.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "elevenlabs",
+      "type": "provider",
+      "title": "ElevenLabs",
+      "summary": "Hosted TTS known for natural, expressive voices.",
+      "tags": [
+        "tts"
+      ],
+      "notes": "Strong quality + voice catalog (accent/gender).\n\n**Cost/credits** become the binding constraint at scale  plan failover early.\n\nKeep a **hot secondary** and exercise fallback (providers do have outages).",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "cartesia",
+      "type": "provider",
+      "title": "Cartesia",
+      "summary": "Hosted low-latency streaming TTS; also offers fast Ink STT/endpointing.",
+      "tags": [
+        "tts",
+        "stt"
+      ],
+      "notes": "Solid voices; **Ink** noted as fast for STT/endpointing.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "openai-realtime",
+      "type": "provider",
+      "title": "OpenAI Realtime API",
+      "summary": "Hosted speech-to-speech conversational API.",
+      "tags": [
+        "s2s"
+      ],
+      "notes": "Collapses the pipeline into one connection. Less control over individual stages.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "pipecat",
+      "type": "tool",
+      "title": "Pipecat",
+      "summary": "Open-source framework for real-time voice and multimodal agents.",
+      "tags": [
+        "framework"
+      ],
+      "notes": "Frames flow through frame processors arranged in a pipeline. Handles interruption plumbing so you do not rebuild it.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "livekit",
+      "type": "tool",
+      "title": "LiveKit",
+      "summary": "WebRTC infrastructure plus agents runtime; Cloud and self-hosted.",
+      "tags": [
+        "framework",
+        "transport",
+        "llm"
+      ],
+      "notes": "- **Egress/recording capacity is a hard limit**; don’t make recording-start failure fatal to the call unless required.\n\n- Failover: parallel workers, health-check self-hosted, route **new** sessions to Cloud when saturated (in-flight may drop).\n\n- Colocated LiveKit Inference can deliver **very low in-call TTFT** for open models.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "webrtc",
+      "type": "tool",
+      "title": "WebRTC",
+      "summary": "Low-latency real-time audio transport for browsers and apps.",
+      "tags": [
+        "transport"
+      ],
+      "notes": "Handles jitter buffering, echo cancellation, and packet loss so you do not have to.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "twilio",
+      "type": "provider",
+      "title": "Twilio",
+      "summary": "Telephony provider for connecting agents to phone calls.",
+      "tags": [
+        "telephony"
+      ],
+      "notes": "Media streams bridge a call into your agent over a websocket.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "observability",
+      "type": "domain",
+      "title": "Observability",
+      "summary": "Tracing, cost, latency, and eval telemetry for voice agents.",
+      "tags": [
+        "ops"
+      ],
+      "notes": "For voice stacks you need per-stage visibility: STT, turn-taking, LLM TTFT, TTS, and end-to-end TTFA — not just one aggregate latency number.\n\nTag every span with **provider** so cost and latency can be compared across backends.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "langfuse",
+      "type": "tool",
+      "title": "Langfuse",
+      "summary": "Open-source LLM observability: traces, cost, latency, scores, prompts, and datasets.",
+      "tags": [
+        "observability"
+      ],
+      "notes": "### Features\n- **Tracing** — nested traces/spans for each LLM/STT/TTS step\n- **Usage & cost** — per-call token usage and cost roll-ups\n- **Latency** — span timings, TTFT / completion-start\n- **Sessions** — group multi-turn interactions\n- **Datasets** — build datasets from real traces for evaluation\n- **Scores / evals** — attach LLM-as-judge or programmatic scores to traces\n- **Prompt management** — versioned prompts\n- **OpenTelemetry** — OTEL-compatible ingestion\n\n### Gotchas\n- Shared OTEL exporter + framework auto-instrumentation can create **orphan/duplicate traces** — isolate or filter exporters.\n- Float `usage_details` may be dropped — send **integers** (e.g. `audio_duration_ms`).\n- Spans that end at async drain look “instant” — backdate with real `duration_ms` / TTFT.\n- Tag **provider** as a property so dashboards group by backend.\n- Trace **sims + evals**, not only live calls.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "ttfa",
+      "type": "metric",
+      "title": "Time to First Audio",
+      "summary": "How long until the user hears the first audio from the agent.",
+      "tags": [
+        "latency"
+      ],
+      "notes": "Separate from **TTFT** (LLM). A fast model does not guarantee low TTFA — turn detection, TTS warmup, and transport all sit on the path.\n\nEven “fast” end-to-end stacks often land around **~1–2s median**. Budget UX accordingly.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "cerebras",
+      "type": "provider",
+      "title": "Cerebras",
+      "summary": "Ultra-low-latency host for open models (Gemma-class, OSS).",
+      "tags": [
+        "llm",
+        "host"
+      ],
+      "notes": "Among the **fastest hosts** for open models.\n\nBest fit for **latency-sensitive/ realtime** paths.\n\nUltra-fast hosts usually cost **more per token** than serverless clouds for the same model  pick by role, not price alone.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "fireworks",
+      "type": "provider",
+      "title": "Fireworks",
+      "summary": "Multi-model serverless inference host.",
+      "tags": [
+        "llm",
+        "host"
+      ],
+      "notes": "- Multi-model serverless can be **markedly slower** than specialized fast hosts",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "morphllm",
+      "type": "provider",
+      "title": "MorphLLM",
+      "summary": "Dedicated / fast OSS inference host.",
+      "tags": [
+        "llm",
+        "host"
+      ],
+      "notes": "",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "wafer",
+      "type": "provider",
+      "title": "Wafer.ai",
+      "summary": "Latency-oriented OSS serverless inference.",
+      "tags": [
+        "llm",
+        "host"
+      ],
+      "notes": "Positioned as **OSS-only, fast**, with zero data retention. Often cited with GLM-class models for voice stacks.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "baseten",
+      "type": "provider",
+      "title": "Baseten",
+      "summary": "Inference host used as a latency reference for GLM-class models.",
+      "tags": [
+        "llm",
+        "host"
+      ],
+      "notes": "",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "featherless",
+      "type": "provider",
+      "title": "Featherless",
+      "summary": "Cheap host for background AI usage where provide fixed cost per month but have concurrency limit",
+      "tags": [
+        "llm",
+        "host",
+        "eval"
+      ],
+      "notes": "- **Low-tier/fixed plans throttle hard on concurrency** — batch, don’t burst. \n- suitable for background AI task ",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "vertex-ai",
+      "type": "provider",
+      "title": "GCP / Vertex AI",
+      "summary": "Google cloud model hosting — serverless Gemini path and Vertex endpoints.",
+      "tags": [
+        "llm",
+        "host"
+      ],
+      "notes": "- Serverless clouds can be **much cheaper** than fast hosts for the same open model.\n- **Quotas can bite mid-session** — verify tier/TPM before prod.\n- Prefer a **host abstraction** so heavier ops (endpoint, service account, secrets) aren’t a one-off code path.\n- Distinguish **Vertex vs the Gemini API** — same models, different auth/quota.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "azure-openai",
+      "type": "provider",
+      "title": "Azure OpenAI / AI Foundry",
+      "summary": "Regionized enterprise host for OpenAI and other model families.",
+      "tags": [
+        "llm",
+        "host"
+      ],
+      "notes": "**Not every model is in every region**; TPM/RPM vary by model + region  deploy region first.\n\n**Provisioned throughput** reserves capacity, but **burst spillover is billed**.\n\nDifferent **model families may need separate regional deployments**.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "openrouter",
+      "type": "provider",
+      "title": "OpenRouter",
+      "summary": "Gateway that routes one model id across many underlying hosts.",
+      "tags": [
+        "llm",
+        "gateway"
+      ],
+      "notes": "Useful to see **which hosts serve a given model** before native integration.\n\nTreat as discovery / routing — still verify latency on the underlying host you actually use.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "together",
+      "type": "provider",
+      "title": "Together AI",
+      "summary": "Open-model inference host.",
+      "tags": [
+        "llm",
+        "host"
+      ],
+      "notes": "Appears as a Gemma-class host via gateways. Validate latency yourself before using for realtime.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "openai",
+      "type": "provider",
+      "title": "OpenAI",
+      "summary": "Direct API for GPT-family models; useful as a TTFT/accuracy baseline.",
+      "tags": [
+        "llm",
+        "host"
+      ],
+      "notes": "Use as a **TTFT / accuracy baseline** when qualifying new hosts.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "gemma-4",
+      "type": "model",
+      "title": "Gemma 4",
+      "summary": "Strong open model for realtime voice: instruction following, tools, transfers.",
+      "tags": [
+        "llm"
+      ],
+      "notes": "- Strong **instruction following, tool use, sub-agent transfers**.\n- Better accuracy than OSS models, at **higher cost per token**.\n- Speed depends heavily on host — specialized fast hosts and colocated inference win.\n- Smaller variants trade **cost/latency vs quality** — pick size after measuring.\n- Livekit Gemma4 is 200ms TTFT",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "gpt-oss",
+      "type": "model",
+      "title": "GPT-OSS",
+      "summary": "Cheap open workhorse model; accuracy trails tuned alternatives.",
+      "tags": [
+        "llm"
+      ],
+      "notes": "Cheap on fast hosts, but **accuracy trails** tuned models like Gemma.\n\nKeep a pre-vetted alternative for spend spikes.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "gpt-5-6-luna",
+      "type": "model",
+      "title": "GPT-5.6 Luna",
+      "summary": "Cheaper GPT-family option for realtime agents.",
+      "tags": [
+        "llm"
+      ],
+      "notes": "- **Much cheaper tokens** than the flagship GPT tier.\n- Acceptable quality/transfers, but **higher TTFT** than colocated open models.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "gpt-5-1",
+      "type": "model",
+      "title": "GPT-5.1",
+      "summary": "Expensive GPT-family baseline for latency and cost comparisons.",
+      "tags": [
+        "llm"
+      ],
+      "notes": "- Use as a latency/cost **upper bound**. Keep only if the quality gap vs cheaper tiers justifies it.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "deepseek-v4",
+      "type": "model",
+      "title": "DeepSeek-V4",
+      "summary": "Flash / Pro model family available via gateways and enterprise clouds.",
+      "tags": [
+        "llm"
+      ],
+      "notes": "",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "minimax",
+      "type": "model",
+      "title": "Minimax",
+      "summary": "Fast model with weak tool / sub-agent reliability in voice sims.",
+      "tags": [
+        "llm"
+      ],
+      "notes": "- Unstable tool-calling \n- Lesson: **TTFT ≠ production readiness** — test tool calling + multi-agent transfers explicitly.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "nemotron-3",
+      "type": "model",
+      "title": "Nemotron 3",
+      "summary": "Open model family; larger variants often too slow for the main voice agent.",
+      "tags": [
+        "llm"
+      ],
+      "notes": "- Larger variants can be **too slow for primary voice**; ",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "muse-glimmer",
+      "type": "model",
+      "title": "Muse Glimmer",
+      "summary": "Open agentic model on the watchlist; claims strong published benches.",
+      "tags": [
+        "llm"
+      ],
+      "notes": "Claims to beat Gemma on published benchmarks",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "gemini-flash-lite",
+      "type": "model",
+      "title": "Gemini Flash Lite",
+      "summary": "Cheap, fast model for bulk / lighter workloads.",
+      "tags": [
+        "llm"
+      ],
+      "notes": "Cheap + fast enough for batch-ish work; watch **rate limits**; confirm Vertex vs Gemini API.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "glm-5",
+      "type": "model",
+      "title": "GLM 5.x",
+      "summary": "Industry latency pick for fast voice stacks.",
+      "tags": [
+        "llm"
+      ],
+      "notes": "- Frequently cited for fast voice stacks (often paired with Wafer / Baseten-class hosts).",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "inworld",
+      "type": "provider",
+      "title": "Inworld",
+      "summary": "Cloud TTS used as a cheaper primary or failover.",
+      "tags": [
+        "tts"
+      ],
+      "notes": "- Cheaper primary or failover; one provider per call, different providers across deployments.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "speechify",
+      "type": "provider",
+      "title": "Speechify",
+      "summary": "Cloud TTS with good quality but a thinner accent catalog.",
+      "tags": [
+        "tts"
+      ],
+      "notes": "Good quality but **thin accent catalog** — multi-provider fleets fill gaps.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "fish-audio",
+      "type": "provider",
+      "title": "Fish Audio",
+      "summary": "Cloud TTS often cited for top voice quality, with reliability/latency tradeoffs.",
+      "tags": [
+        "tts"
+      ],
+      "notes": "- Often cited **best voice quality** with **reliability/latency tradeoffs**.\n- Evaluate **emotion/prosody controls** as a quality axis beyond single-line MOS.\n\n- Related open model path: Fish Speech (slow linguistic + fast acoustic stages, Firefly-GAN vocoder).",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "assemblyai",
+      "type": "provider",
+      "title": "AssemblyAI",
+      "summary": "Cloud ASR commonly used as a Deepgram failover.",
+      "tags": [
+        "stt"
+      ],
+      "notes": "",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "soniox",
+      "type": "provider",
+      "title": "Soniox",
+      "summary": "Cloud ASR noted for fast endpointing.",
+      "tags": [
+        "stt"
+      ],
+      "notes": "Cited as a fast endpointing option that cuts turn-taking latency.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "plivo",
+      "type": "provider",
+      "title": "Plivo",
+      "summary": "Telephony / SIP carrier for voice-agent calls.",
+      "tags": [
+        "telephony"
+      ],
+      "notes": "- Inbound via SIP URI; outbound termination configured at the carrier.\n- **Carrier CPS limits** throttle outbound fan-out — don’t burst.\n- Failures often sit at the **carrier or media layer** — document trunks + health checks.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "audio",
+        "fundamentals"
+      ],
+      "notes": "- A waveform is the microphone signal in the time domain: amplitude changing over time.\n- Working directly with it preserves the original signal, but produces a long input sequence.\n- Most speech systems first turn the waveform into a time-frequency representation. That throws away some detail, but gives the model a much smaller and more useful input.",
+      "id": "audio-representation",
+      "type": "concept",
+      "title": "Audio Representation",
+      "summary": "How raw microphone signal is turned into something a model can consume.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "audio",
+        "fundamentals"
+      ],
+      "notes": "- A Fourier transform tells us which frequencies exist in a signal, but not when they occur. Speech changes constantly, so we apply it to short overlapping windows.\n- Stack those windows over time and you get a spectrogram: time on one axis, frequency on the other, and energy represented by intensity.\n- This is why convolutions work well on audio. A spectrogram is a grid with local patterns, much like an image.",
+      "id": "stft",
+      "type": "concept",
+      "title": "Short-Time Fourier Transform",
+      "summary": "Fourier analysis on short overlapping windows so frequency content can be tracked over time.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "audio",
+        "fundamentals"
+      ],
+      "notes": "- Built by stacking STFT windows: time on one axis, frequency on the other, intensity as energy.\n- Treating it as a grid is why CNN-style layers transfer so well from vision to speech.",
+      "id": "spectrogram",
+      "type": "concept",
+      "title": "Spectrogram",
+      "summary": "A 2D time–frequency image of audio energy.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "audio",
+        "fundamentals"
+      ],
+      "notes": "- Remaps frequency so small changes at low frequencies matter more than equal-sized changes at high frequencies.\n- Practical default for recognition and synthesis: compact, while keeping the parts of the signal that matter for speech.\n- Whisper mental model: PCM → window → FFT → mel filters + log compression → transformer.",
+      "id": "mel-spectrogram",
+      "type": "concept",
+      "title": "Mel Spectrogram",
+      "summary": "A spectrogram remapped to roughly match human hearing.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "audio",
+        "fundamentals"
+      ],
+      "notes": "- Compress a mel spectrogram into a small feature vector. Standard input for traditional recognizers; still useful on constrained devices.\n- Modern models usually learn richer representations themselves, so MFCCs are no longer the automatic choice.",
+      "id": "mfcc",
+      "type": "concept",
+      "title": "MFCC",
+      "summary": "Compact hand-designed features derived from a mel spectrogram.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "tts",
+        "linguistics"
+      ],
+      "notes": "- A grapheme is what is written; a phoneme is a sound. TTS has to solve pronunciation, not merely read characters.",
+      "id": "phoneme",
+      "type": "concept",
+      "title": "Phoneme",
+      "summary": "A sound unit that can change a word's meaning.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "tts"
+      ],
+      "notes": "- Makes pronunciation explicit. Especially useful for names, abbreviations, and languages where spelling does not map cleanly to sound.\n- Byte-based models take another route: consume UTF-8 bytes and learn the mapping without a separate tokenizer or pronunciation dictionary.",
+      "id": "grapheme-to-phoneme",
+      "type": "concept",
+      "title": "Grapheme-to-Phoneme",
+      "summary": "Converting written characters into pronunciation units.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "audio",
+        "frontend"
+      ],
+      "notes": "- Useful only when it improves the signal that reaches VAD and STT. An aggressive filter can remove consonants or distort speaker cues — cleaner-sounding audio is not always better recognition input.\n- RTF matters because denoising sits on every incoming frame. A model that is accurate but eats the latency budget is the wrong front-end model.",
+      "id": "denoising",
+      "type": "concept",
+      "title": "Denoising",
+      "summary": "Cleaning incoming audio before VAD and STT.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "codec",
+        "speech-llm"
+      ],
+      "notes": "- Turns a waveform into a compact stream of learned audio tokens and can decode those tokens back into sound. Unlike a text tokenizer, it must carry speaker identity, pitch and timing.\n- Codecs make speech generation look more like language modelling: predict token IDs, then decode them into audio.",
+      "id": "neural-audio-codec",
+      "type": "concept",
+      "title": "Neural Audio Codec",
+      "summary": "Learns to turn a waveform into discrete audio tokens and back.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "codec"
+      ],
+      "notes": "- Approximates a vector in stages. The first codebook picks a coarse vector; each later codebook quantizes what the earlier stages missed.\n- More codebooks preserve more detail but increase bitrate and generation work — the central quality-versus-speed trade-off in codec-based speech models.\n- EnCodec and Mimi are good concrete examples.",
+      "id": "rvq",
+      "type": "concept",
+      "title": "Residual Vector Quantization",
+      "summary": "Multi-stage codebook compression used by neural audio codecs.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "speech-llm"
+      ],
+      "notes": "- Speech tokens are not all trying to preserve the same thing.\n- Semantic tokens keep words and meaning (useful for ASR). Acoustic tokens keep timbre, prosody and fine sound detail (useful for generation).\n- Speech-to-speech systems usually need a mixed representation. If the tokenizer drops speaker or timing information, the language model cannot recover it later.",
+      "id": "speech-tokenizer",
+      "type": "concept",
+      "title": "Speech Tokenizer",
+      "summary": "Discrete tokens for speech — semantic, acoustic, or mixed.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "speech-llm"
+      ],
+      "notes": "- Built from a speech tokenizer, a language model over those tokens, and a token-to-speech synthesizer.",
+      "id": "speech-language-model",
+      "type": "concept",
+      "title": "Speech Language Model",
+      "summary": "An LLM that reasons over speech tokens, not only text.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "speech-llm",
+        "architecture"
+      ],
+      "notes": "- Does not need to rebuild the language model. A speech encoder turns audio into embeddings, an adapter projects them to the LLM's embedding size, and those vectors replace an audio placeholder in the prompt.\n- Useful mental model: reshape speech until the LLM can attend to it like text. The encoder handles perception; the LLM handles the task.\n- Temporal subsampling matters because raw audio produces far too many frames for an LLM context window.",
+      "id": "speech-augmented-llm",
+      "type": "concept",
+      "title": "Speech-Augmented LLM",
+      "summary": "Project speech embeddings into an existing LLM so it can attend to audio like text.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "speech-llm",
+        "stt"
+      ],
+      "notes": "- Extracts high-level acoustic/semantic features. Often a Conformer or Whisper-style encoder, sometimes with aggressive temporal downsampling.",
+      "id": "speech-encoder",
+      "type": "concept",
+      "title": "Speech Encoder",
+      "summary": "Turns audio into embeddings for a speech-augmented LLM or ASR model.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "speech-llm",
+        "architecture"
+      ],
+      "notes": "- Often a linear projection or a small Conformer stack. The goal is structural alignment so the LLM can treat audio embeddings like text embeddings.",
+      "id": "modality-adapter",
+      "type": "concept",
+      "title": "Modality Adapter",
+      "summary": "Projects speech embeddings into the LLM's token space.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "speech-to-speech",
+        "ux"
+      ],
+      "notes": "- More than streaming in both directions: the model also has to decide when to yield, continue, interrupt or handle overlap.\n- Half duplex is easier to operate because each turn has a clear boundary. Full duplex feels better only when interruption and timing are reliable.",
+      "id": "full-duplex",
+      "type": "concept",
+      "title": "Full Duplex",
+      "summary": "Listening and speaking at the same time, including overlap and interruption.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "speech-to-speech"
+      ],
+      "notes": "- Gives generation a place to form a coherent answer before committing to sound.\n- Easier to inspect than audio tokens, though it does not provide the clean observability of a fully cascaded pipeline.",
+      "id": "inner-monologue",
+      "type": "pattern",
+      "title": "Inner Monologue",
+      "summary": "Predict a text-like stream before emitting acoustic tokens.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "tts"
+      ],
+      "notes": "- Common TTS split: text → acoustic representation → waveform. This is the first half.",
+      "id": "acoustic-model",
+      "type": "concept",
+      "title": "Acoustic Model (TTS)",
+      "summary": "Maps text (or phonemes) to an intermediate acoustic representation.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "tts"
+      ],
+      "notes": "- Second half of the classic TTS split.\n- Autoregressive waveform models such as WaveNet showed how natural neural speech could sound, but one sample at a time was too slow. Later GAN, flow and codec decoders made real-time use practical.\n- HiFi-GAN is the useful baseline: fast GAN-based waveform synthesis used behind many acoustic models.",
+      "id": "vocoder",
+      "type": "concept",
+      "title": "Vocoder",
+      "summary": "Turns an acoustic representation or audio tokens into a waveform.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "tts",
+        "vocoder"
+      ],
+      "notes": "- Useful baseline to remember for waveform synthesis speed and quality.",
+      "id": "hifi-gan",
+      "type": "model",
+      "title": "HiFi-GAN",
+      "summary": "Fast GAN-based vocoder; common baseline behind many TTS systems.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "tts"
+      ],
+      "notes": "- Three common levels: condition on a short reference clip, adapt the model to one speaker, or continue from recent speech context.\n- Reference conditioning is convenient; adaptation usually improves fidelity but needs more clean data and a separate model or adapter.\n- Evaluate intelligibility and speaker similarity separately. A sample can sound natural while sounding like the wrong person.",
+      "id": "voice-cloning",
+      "type": "concept",
+      "title": "Voice Cloning",
+      "summary": "Generating speech that matches a target speaker.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "tts",
+        "eval"
+      ],
+      "notes": "- Usually cosine similarity of speaker embeddings. Separate from naturalness — a clone can sound good and still be the wrong voice.",
+      "id": "speaker-similarity",
+      "type": "metric",
+      "title": "Speaker Similarity",
+      "summary": "How closely generated speech matches a target speaker embedding.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "tts",
+        "local"
+      ],
+      "notes": "- Small enough to change the deployment calculation — practical for local or colocated TTS where a large codec language model would be wasteful.\n- Treat size as an operational advantage, not proof of voice quality. Accent, pronunciation and streaming behaviour still need testing on the actual script.",
+      "id": "kokoro",
+      "type": "model",
+      "title": "Kokoro",
+      "summary": "Small efficient TTS; useful when a large codec LM would be wasteful.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "tts"
+      ],
+      "notes": "- Treats TTS as audio-token generation with a Llama-based model, then uses the SNAC codec to turn hierarchical tokens into a waveform.\n- Clear example of TTS moving from spectrogram prediction toward language modelling over discrete audio.",
+      "id": "orpheus",
+      "type": "model",
+      "title": "Orpheus",
+      "summary": "Llama-based TTS that generates audio tokens decoded by SNAC.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "codec",
+        "tts"
+      ],
+      "notes": "- Hierarchical tokenization for accurate waveform reconstruction from discrete audio tokens.",
+      "id": "snac",
+      "type": "model",
+      "title": "SNAC",
+      "summary": "Hierarchical neural audio codec used to decode TTS audio tokens.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "tts"
+      ],
+      "notes": "- Separates slower linguistic planning from faster acoustic detail generation — meaning and waveform detail do not have to run at the same rate.\n- Firefly-GAN decoder reconstructs the waveform from quantized features.",
+      "id": "fish-speech",
+      "type": "model",
+      "title": "Fish Speech",
+      "summary": "TTS with slow linguistic planning and faster acoustic detail generation.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "tts",
+        "vocoder"
+      ],
+      "notes": "- Reconstructs waveform from Fish Speech's quantized acoustic features.",
+      "id": "firefly-gan",
+      "type": "model",
+      "title": "Firefly-GAN",
+      "summary": "GAN vocoder used by Fish Speech.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "tts",
+        "cloning"
+      ],
+      "notes": "- Combines a text model, reference-audio tokenizer, speaker embedding and a flow-matching acoustic generator. The reference clip conditions both who is speaking and how they speak.\n- Useful example of why cloning quality depends on more than one speaker vector: reference speech can also carry rhythm and expression.",
+      "id": "chatterbox",
+      "type": "model",
+      "title": "Chatterbox",
+      "summary": "Multi-stage TTS with reference-audio conditioning for voice and style.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "codec",
+        "speech-to-speech"
+      ],
+      "notes": "- Encodes and decodes audio tokens for Moshi. Mixes semantic and acoustic information for real-time speech.",
+      "id": "mimi",
+      "type": "model",
+      "title": "Mimi",
+      "summary": "Streaming neural audio codec used by Moshi.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "speech-to-speech"
+      ],
+      "notes": "- Uses Mimi to encode/decode audio tokens, a language model for linguistic generation, and parallel streams for user and assistant.\n- Interesting part is not just low latency: listening and speaking are concurrent streams, so overlap and interruption are part of generation rather than external pipeline logic.\n- Inner text stream improves linguistic structure before audio-token generation.",
+      "id": "moshi",
+      "type": "model",
+      "title": "Moshi",
+      "summary": "Full-duplex speech-to-speech model with concurrent listen/speak streams.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "stt",
+        "translation"
+      ],
+      "notes": "- Built around a FastConformer encoder for transcription and speech translation.\n- Aggressive temporal downsampling is the key idea: fewer audio frames while keeping enough local and global context.\n- Task tokens select transcription, translation, punctuation and capitalization behaviour.",
+      "id": "canary",
+      "type": "model",
+      "title": "Canary",
+      "summary": "Encoder-decoder ASR/translation model with a FastConformer encoder.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "stt"
+      ],
+      "notes": "- Often handled by the same encoder-decoder family as ASR, guided by task tokens.",
+      "id": "speech-translation",
+      "type": "concept",
+      "title": "Speech Translation",
+      "summary": "Translating spoken language into another language's text or speech.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "infra"
+      ],
+      "notes": "- Covers quantization, caching, streaming, and other serving tricks. Always measure per component — STT, LLM and TTS fail differently.",
+      "id": "inference-optimization",
+      "type": "domain",
+      "title": "Inference Optimization",
+      "summary": "Making voice-stack inference faster, cheaper, or smaller without breaking quality.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "inference"
+      ],
+      "notes": "- Reduces precision to shrink memory use and speed up inference on hardware that supports the chosen format.\n- The actual win depends on the runtime and GPU. A smaller checkpoint does not automatically mean lower latency.\n- Test quality per component. STT may lose rare words, an LLM may lose tool reliability, and TTS may introduce audible artefacts even when aggregate benchmarks barely move.",
+      "id": "quantization",
+      "type": "concept",
+      "title": "Quantization",
+      "summary": "Reducing numeric precision to shrink memory and speed inference.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "inference",
+        "tts"
+      ],
+      "notes": "- Compute once for a known voice instead of re-encoding the reference clip for every utterance.\n- LLM KV caching avoids recomputing the conversation prefix during token generation.\n- Whole-response caching is less useful for an agent because context changes, but fixed prompts and repeated system audio can still be cached safely.",
+      "id": "speaker-embedding-cache",
+      "type": "pattern",
+      "title": "Speaker Embedding Cache",
+      "summary": "Cache stable speaker embeddings instead of re-encoding reference audio every turn.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "eval"
+      ],
+      "notes": "- Audio quality, conversation quality and business outcome are different evaluations.\n- TTS: intelligibility, naturalness, speaker similarity and first-audio latency.\n- STT: WER by accent, language, noise and domain vocabulary — not one overall number.\n- Agent: task completion, tool correctness, interruption handling, escalation and end-to-end latency.\n- A polished demo can hide failures because the room, script and caller are controlled. Keep a small set of ugly real-world calls and rerun them on every meaningful change.",
+      "id": "evaluation",
+      "type": "domain",
+      "title": "Evaluation",
+      "summary": "Measuring whether the voice agent works — by layer, not only by demo feel.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "tags": [
+        "tts",
+        "eval"
+      ],
+      "notes": "- Useful for comparing signal degradation across configs. Not a substitute for human MOS on synthetic speech.",
+      "id": "pesq",
+      "type": "metric",
+      "title": "PESQ",
+      "summary": "Automated perceptual speech quality score; useful for signal comparisons.",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "benchmark",
+      "type": "metric",
+      "title": "Benchmark",
+      "summary": "A collection benchmarks for LLM,TTS,STT etc",
+      "tags": [
+        "Benchmark"
+      ],
+      "notes": "",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "new-node",
+      "type": "domain",
+      "title": "Livekit LLM benchmark",
+      "summary": "Voice AI, measured from every angle. From latency to cost to real-world capabilities, see exactly how each model performs.",
+      "tags": [
+        "benchmark"
+      ],
+      "notes": "- https://livekit.com/benchmarks/capabilities",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "new-node-2",
+      "type": "metric",
+      "title": "Voice Agent benchmarks",
+      "summary": "Voice AI benchmarks in real world conditions.",
+      "tags": [
+        "benchmark"
+      ],
+      "notes": "- https://benchmarks.coval.ai/overview ",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "andromeda",
+      "type": "provider",
+      "title": "Andromeda",
+      "summary": "Andromeda connects AI teams with high-performance compute fast, at scale, and on terms that work",
+      "tags": [],
+      "notes": "- https://andromeda.ai/",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "jambonz",
+      "type": "tool",
+      "title": "jambonz",
+      "summary": "Build Smarter Voice AI. Your Way. ",
+      "tags": [],
+      "notes": "- jambonz Outperforms LiveKit 10x in Voice AI Concurrency\n- https://jambonz.org/",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "vamos-bench",
+      "type": "metric",
+      "title": "VAmoS Bench",
+      "summary": "",
+      "tags": [
+        "ben"
+      ],
+      "notes": "Voice Agent Simulation Bench (VAmoS) runs a credit card support agent through simulated phone calls and judges them on end-to-end task completion.\n",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "new-node-3",
+      "type": "metric",
+      "title": "New node",
+      "summary": "",
+      "tags": [],
+      "notes": "New node",
+      "created": "2026-08-12",
+      "updated": "2026-08-12"
+    },
+    {
+      "id": "prefix-caching",
+      "type": "cost-reduction",
+      "title": "Prefix caching",
+      "summary": "",
+      "tags": [],
+      "notes": "Prompt caching matters at scale  Cache strategy and request distribution can dramatically affect cost; providers don't necessarily optimize this for your application's traffic pattern.\n\nwe should design your architecture around stable prefixes. on calls so let say for a company we making 1k+ calls if we have a stable prefix in prompt it will save lot of cost.\n\nOpenAI takes roughly the first ~60–70 characters/tokens of the prompt, hashes that, and uses it for routing. He qualifies the exact number as approximate\n\nI fwe send 100 requests almost simultaneously, you cannot assume all 100 hit the same warm cache.They get routed to different machines on OpenAI's backend, where those machines can independently warm their own caches. so it take some time for openaI to cache the on all machine we have also note some time the request may routed to diff machine where will not have the cache hit to avoid use response id which make the request always to same machine",
+      "created": "2026-08-15",
+      "updated": "2026-08-15"
+    },
+    {
+      "id": "shadowlm",
+      "type": "finetune",
+      "title": "shadowlm",
+      "summary": "",
+      "tags": [
+        "smallllm"
+      ],
+      "notes": "Move one task off a rented frontier model and onto a small model you own — without touching the agent. It runs in the model's shadow until it does the job as well, then takes over.\n\nhttps://shadowlm.sh/",
+      "created": "2026-08-15",
+      "updated": "2026-08-15"
+    }
+  ],
+  "edges": [
+    {
+      "id": "e-vad-va",
+      "from": "vad",
+      "to": "voice-agent",
+      "type": "part_of"
+    },
+    {
+      "id": "e-stt-va",
+      "from": "stt",
+      "to": "voice-agent",
+      "type": "part_of"
+    },
+    {
+      "id": "e-llm-va",
+      "from": "llm",
+      "to": "voice-agent",
+      "type": "part_of"
+    },
+    {
+      "id": "e-tts-va",
+      "from": "tts",
+      "to": "voice-agent",
+      "type": "part_of"
+    },
+    {
+      "id": "e-s2s-va",
+      "from": "speech-to-speech",
+      "to": "voice-agent",
+      "type": "part_of"
+    },
+    {
+      "id": "e-transport-va",
+      "from": "transport",
+      "to": "voice-agent",
+      "type": "part_of"
+    },
+    {
+      "id": "e-tel-va",
+      "from": "telephony",
+      "to": "voice-agent",
+      "type": "part_of"
+    },
+    {
+      "id": "e-vad-stt",
+      "from": "vad",
+      "to": "stt",
+      "type": "precedes"
+    },
+    {
+      "id": "e-llm-tts",
+      "from": "llm",
+      "to": "tts",
+      "type": "precedes"
+    },
+    {
+      "id": "e-tts-transport",
+      "from": "tts",
+      "to": "transport",
+      "type": "precedes"
+    },
+    {
+      "id": "e-silero-vad",
+      "from": "silero-vad",
+      "to": "vad",
+      "type": "part_of"
+    },
+    {
+      "id": "e-webrtcvad-vad",
+      "from": "webrtc-vad",
+      "to": "vad",
+      "type": "part_of"
+    },
+    {
+      "id": "e-silero-webrtcvad",
+      "from": "silero-vad",
+      "to": "webrtc-vad",
+      "type": "alternative_to",
+      "note": "Neural detector versus classic signal processing."
+    },
+    {
+      "id": "e-whisper-stt",
+      "from": "whisper",
+      "to": "stt",
+      "type": "part_of"
+    },
+    {
+      "id": "e-deepgram-stt",
+      "from": "deepgram",
+      "to": "stt",
+      "type": "part_of"
+    },
+    {
+      "id": "e-stt-wer",
+      "from": "stt",
+      "to": "wer",
+      "type": "measured_by"
+    },
+    {
+      "id": "e-stt-rtf",
+      "from": "stt",
+      "to": "rtf",
+      "type": "measured_by"
+    },
+    {
+      "id": "e-llama-llm",
+      "from": "llama-3-3-70b",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-groq-llama",
+      "from": "groq",
+      "to": "llama-3-3-70b",
+      "type": "uses"
+    },
+    {
+      "id": "e-ollama-llm",
+      "from": "ollama",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-vllm-llm",
+      "from": "vllm",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-vllm-ollama",
+      "from": "vllm",
+      "to": "ollama",
+      "type": "tradeoff_vs",
+      "note": "Throughput and concurrency versus setup simplicity."
+    },
+    {
+      "id": "e-llm-ttft",
+      "from": "llm",
+      "to": "ttft",
+      "type": "measured_by"
+    },
+    {
+      "id": "e-piper-tts",
+      "from": "piper",
+      "to": "tts",
+      "type": "part_of"
+    },
+    {
+      "id": "e-xtts-tts",
+      "from": "xtts-v2",
+      "to": "tts",
+      "type": "part_of"
+    },
+    {
+      "id": "e-eleven-tts",
+      "from": "elevenlabs",
+      "to": "tts",
+      "type": "part_of"
+    },
+    {
+      "id": "e-cartesia-tts",
+      "from": "cartesia",
+      "to": "tts",
+      "type": "part_of"
+    },
+    {
+      "id": "e-tts-mos",
+      "from": "tts",
+      "to": "mos",
+      "type": "measured_by"
+    },
+    {
+      "id": "e-tts-rtf",
+      "from": "tts",
+      "to": "rtf",
+      "type": "measured_by"
+    },
+    {
+      "id": "e-oai-s2s",
+      "from": "openai-realtime",
+      "to": "speech-to-speech",
+      "type": "part_of"
+    },
+    {
+      "id": "e-livekit-transport",
+      "from": "livekit",
+      "to": "transport",
+      "type": "part_of"
+    },
+    {
+      "id": "e-webrtc-transport",
+      "from": "webrtc",
+      "to": "transport",
+      "type": "part_of"
+    },
+    {
+      "id": "e-pipecat-webrtc",
+      "from": "pipecat",
+      "to": "webrtc",
+      "type": "uses"
+    },
+    {
+      "id": "e-twilio-tel",
+      "from": "twilio",
+      "to": "telephony",
+      "type": "part_of"
+    },
+    {
+      "id": "e-turn-vad",
+      "from": "turn-taking",
+      "to": "vad",
+      "type": "part_of"
+    },
+    {
+      "id": "e-obs-va",
+      "from": "observability",
+      "to": "voice-agent",
+      "type": "part_of"
+    },
+    {
+      "id": "e-langfuse-obs",
+      "from": "langfuse",
+      "to": "observability",
+      "type": "part_of"
+    },
+    {
+      "id": "e-pipeline-ttfa",
+      "from": "voice-agent",
+      "to": "ttfa",
+      "type": "measured_by"
+    },
+    {
+      "id": "e-ttft-ttfa",
+      "from": "ttft",
+      "to": "ttfa",
+      "type": "related_to",
+      "note": "Fast TTFT does not imply low TTFA."
+    },
+    {
+      "id": "e-cerebras-llm",
+      "from": "cerebras",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-fireworks-llm",
+      "from": "fireworks",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-morphllm-llm",
+      "from": "morphllm",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-wafer-llm",
+      "from": "wafer",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-baseten-llm",
+      "from": "baseten",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-featherless-llm",
+      "from": "featherless",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-vertex-ai-llm",
+      "from": "vertex-ai",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-azure-openai-llm",
+      "from": "azure-openai",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-openrouter-llm",
+      "from": "openrouter",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-together-llm",
+      "from": "together",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-openai-llm",
+      "from": "openai",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-groq-llm",
+      "from": "groq",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-livekit-llm",
+      "from": "livekit",
+      "to": "llm",
+      "type": "related_to",
+      "note": "LiveKit Inference can host models colocated with transport."
+    },
+    {
+      "id": "e-openrouter-gateway",
+      "from": "openrouter",
+      "to": "cerebras",
+      "type": "related_to",
+      "note": "Gateway / discovery across hosts."
+    },
+    {
+      "id": "e-cerebras-fireworks",
+      "from": "cerebras",
+      "to": "fireworks",
+      "type": "tradeoff_vs",
+      "note": "Specialized fast host vs multi-model serverless — latency vs catalog breadth."
+    },
+    {
+      "id": "e-cerebras-vertex",
+      "from": "cerebras",
+      "to": "vertex-ai",
+      "type": "tradeoff_vs",
+      "note": "Fast host vs cheaper serverless cloud for the same open model."
+    },
+    {
+      "id": "e-cerebras-groq",
+      "from": "cerebras",
+      "to": "groq",
+      "type": "alternative_to",
+      "note": "Both among the fastest open-model hosts."
+    },
+    {
+      "id": "e-gemma-4-llm",
+      "from": "gemma-4",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-gpt-oss-llm",
+      "from": "gpt-oss",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-gpt-5-6-luna-llm",
+      "from": "gpt-5-6-luna",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-gpt-5-1-llm",
+      "from": "gpt-5-1",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-deepseek-v4-llm",
+      "from": "deepseek-v4",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-minimax-llm",
+      "from": "minimax",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-nemotron-3-llm",
+      "from": "nemotron-3",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-muse-glimmer-llm",
+      "from": "muse-glimmer",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-gemini-flash-lite-llm",
+      "from": "gemini-flash-lite",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-glm-5-llm",
+      "from": "glm-5",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-gemma-cerebras",
+      "from": "cerebras",
+      "to": "gemma-4",
+      "type": "uses"
+    },
+    {
+      "id": "e-gemma-groq",
+      "from": "groq",
+      "to": "gemma-4",
+      "type": "uses"
+    },
+    {
+      "id": "e-gemma-livekit",
+      "from": "livekit",
+      "to": "gemma-4",
+      "type": "uses"
+    },
+    {
+      "id": "e-gemma-vertex",
+      "from": "vertex-ai",
+      "to": "gemma-4",
+      "type": "uses"
+    },
+    {
+      "id": "e-gemma-fireworks",
+      "from": "fireworks",
+      "to": "gemma-4",
+      "type": "uses"
+    },
+    {
+      "id": "e-gptoss-cerebras",
+      "from": "cerebras",
+      "to": "gpt-oss",
+      "type": "uses"
+    },
+    {
+      "id": "e-gemma-gptoss",
+      "from": "gemma-4",
+      "to": "gpt-oss",
+      "type": "tradeoff_vs",
+      "note": "Better accuracy vs cheaper tokens."
+    },
+    {
+      "id": "e-gemma-minimax",
+      "from": "gemma-4",
+      "to": "minimax",
+      "type": "tradeoff_vs",
+      "note": "Reliable tools/transfers vs unstable tool loops despite fine TTFT."
+    },
+    {
+      "id": "e-luna-gpt51",
+      "from": "gpt-5-6-luna",
+      "to": "gpt-5-1",
+      "type": "alternative_to",
+      "note": "Much cheaper tokens; keep flagship only if quality gap justifies it."
+    },
+    {
+      "id": "e-openai-luna",
+      "from": "openai",
+      "to": "gpt-5-6-luna",
+      "type": "uses"
+    },
+    {
+      "id": "e-openai-gpt51",
+      "from": "openai",
+      "to": "gpt-5-1",
+      "type": "uses"
+    },
+    {
+      "id": "e-azure-luna",
+      "from": "azure-openai",
+      "to": "gpt-5-6-luna",
+      "type": "uses"
+    },
+    {
+      "id": "e-azure-gpt51",
+      "from": "azure-openai",
+      "to": "gpt-5-1",
+      "type": "uses"
+    },
+    {
+      "id": "e-morph-minimax",
+      "from": "morphllm",
+      "to": "minimax",
+      "type": "uses"
+    },
+    {
+      "id": "e-wafer-glm",
+      "from": "wafer",
+      "to": "glm-5",
+      "type": "uses"
+    },
+    {
+      "id": "e-baseten-glm",
+      "from": "baseten",
+      "to": "glm-5",
+      "type": "uses"
+    },
+    {
+      "id": "e-vertex-gemini",
+      "from": "vertex-ai",
+      "to": "gemini-flash-lite",
+      "type": "uses"
+    },
+    {
+      "id": "e-nemotron-ttft",
+      "from": "nemotron-3",
+      "to": "ttft",
+      "type": "measured_by"
+    },
+    {
+      "id": "e-gemma-ttft",
+      "from": "gemma-4",
+      "to": "ttft",
+      "type": "measured_by"
+    },
+    {
+      "id": "e-luna-ttft",
+      "from": "gpt-5-6-luna",
+      "to": "ttft",
+      "type": "measured_by"
+    },
+    {
+      "id": "e-inworld-tts",
+      "from": "inworld",
+      "to": "tts",
+      "type": "part_of"
+    },
+    {
+      "id": "e-speechify-tts",
+      "from": "speechify",
+      "to": "tts",
+      "type": "part_of"
+    },
+    {
+      "id": "e-fish-audio-tts",
+      "from": "fish-audio",
+      "to": "tts",
+      "type": "part_of"
+    },
+    {
+      "id": "e-eleven-inworld",
+      "from": "elevenlabs",
+      "to": "inworld",
+      "type": "alternative_to",
+      "note": "Quality/catalog vs cost and failover."
+    },
+    {
+      "id": "e-fish-eleven",
+      "from": "fish-audio",
+      "to": "elevenlabs",
+      "type": "tradeoff_vs",
+      "note": "Peak quality vs reliability/latency."
+    },
+    {
+      "id": "e-speechify-eleven",
+      "from": "speechify",
+      "to": "elevenlabs",
+      "type": "tradeoff_vs",
+      "note": "Per-voice quality vs catalog breadth (accents)."
+    },
+    {
+      "id": "e-assembly-stt",
+      "from": "assemblyai",
+      "to": "stt",
+      "type": "part_of"
+    },
+    {
+      "id": "e-soniox-stt",
+      "from": "soniox",
+      "to": "stt",
+      "type": "part_of"
+    },
+    {
+      "id": "e-assembly-deepgram",
+      "from": "assemblyai",
+      "to": "deepgram",
+      "type": "alternative_to",
+      "note": "Common failover pair."
+    },
+    {
+      "id": "e-cartesia-stt",
+      "from": "cartesia",
+      "to": "stt",
+      "type": "related_to",
+      "note": "Ink for fast endpointing."
+    },
+    {
+      "id": "e-soniox-turn",
+      "from": "soniox",
+      "to": "turn-taking",
+      "type": "related_to"
+    },
+    {
+      "id": "e-plivo-tel",
+      "from": "plivo",
+      "to": "telephony",
+      "type": "part_of"
+    },
+    {
+      "id": "e-plivo-twilio",
+      "from": "plivo",
+      "to": "twilio",
+      "type": "alternative_to"
+    },
+    {
+      "id": "e-pipecat-turn",
+      "from": "pipecat",
+      "to": "turn-taking",
+      "type": "related_to",
+      "note": "Smart Turn for end-of-turn / barge-in."
+    },
+    {
+      "id": "e-livekit-turn",
+      "from": "livekit",
+      "to": "turn-taking",
+      "type": "related_to",
+      "note": "Built-in turn detector; compare vs Pipecat Smart Turn."
+    },
+    {
+      "id": "e-audio-representation-part_of-voice-agent",
+      "from": "audio-representation",
+      "to": "voice-agent",
+      "type": "part_of"
+    },
+    {
+      "id": "e-stt-uses-audio-representation",
+      "from": "stt",
+      "to": "audio-representation",
+      "type": "uses"
+    },
+    {
+      "id": "e-tts-uses-audio-representation",
+      "from": "tts",
+      "to": "audio-representation",
+      "type": "uses"
+    },
+    {
+      "id": "e-stft-related_to-spectrogram",
+      "from": "stft",
+      "to": "spectrogram",
+      "type": "related_to",
+      "note": "STFT windows stacked over time"
+    },
+    {
+      "id": "e-spectrogram-related_to-stt",
+      "from": "spectrogram",
+      "to": "stt",
+      "type": "related_to"
+    },
+    {
+      "id": "e-mel-spectrogram-part_of-audio-representation",
+      "from": "mel-spectrogram",
+      "to": "audio-representation",
+      "type": "part_of"
+    },
+    {
+      "id": "e-whisper-uses-mel-spectrogram",
+      "from": "whisper",
+      "to": "mel-spectrogram",
+      "type": "uses"
+    },
+    {
+      "id": "e-mfcc-alternative_to-mel-spectrogram",
+      "from": "mfcc",
+      "to": "mel-spectrogram",
+      "type": "alternative_to"
+    },
+    {
+      "id": "e-grapheme-to-phoneme-part_of-tts",
+      "from": "grapheme-to-phoneme",
+      "to": "tts",
+      "type": "part_of"
+    },
+    {
+      "id": "e-phoneme-related_to-grapheme-to-phoneme",
+      "from": "phoneme",
+      "to": "grapheme-to-phoneme",
+      "type": "related_to"
+    },
+    {
+      "id": "e-denoising-precedes-vad",
+      "from": "denoising",
+      "to": "vad",
+      "type": "precedes"
+    },
+    {
+      "id": "e-denoising-measured_by-rtf",
+      "from": "denoising",
+      "to": "rtf",
+      "type": "measured_by"
+    },
+    {
+      "id": "e-neural-audio-codec-part_of-speech-to-speech",
+      "from": "neural-audio-codec",
+      "to": "speech-to-speech",
+      "type": "part_of"
+    },
+    {
+      "id": "e-neural-audio-codec-uses-rvq",
+      "from": "neural-audio-codec",
+      "to": "rvq",
+      "type": "uses"
+    },
+    {
+      "id": "e-speech-tokenizer-part_of-speech-language-model",
+      "from": "speech-tokenizer",
+      "to": "speech-language-model",
+      "type": "part_of"
+    },
+    {
+      "id": "e-speech-language-model-related_to-speech-to-speech",
+      "from": "speech-language-model",
+      "to": "speech-to-speech",
+      "type": "related_to"
+    },
+    {
+      "id": "e-speech-augmented-llm-uses-speech-encoder",
+      "from": "speech-augmented-llm",
+      "to": "speech-encoder",
+      "type": "uses"
+    },
+    {
+      "id": "e-speech-augmented-llm-uses-modality-adapter",
+      "from": "speech-augmented-llm",
+      "to": "modality-adapter",
+      "type": "uses"
+    },
+    {
+      "id": "e-speech-augmented-llm-related_to-llm",
+      "from": "speech-augmented-llm",
+      "to": "llm",
+      "type": "related_to"
+    },
+    {
+      "id": "e-full-duplex-part_of-speech-to-speech",
+      "from": "full-duplex",
+      "to": "speech-to-speech",
+      "type": "part_of"
+    },
+    {
+      "id": "e-full-duplex-related_to-turn-taking",
+      "from": "full-duplex",
+      "to": "turn-taking",
+      "type": "related_to"
+    },
+    {
+      "id": "e-moshi-uses-inner-monologue",
+      "from": "moshi",
+      "to": "inner-monologue",
+      "type": "uses"
+    },
+    {
+      "id": "e-acoustic-model-part_of-tts",
+      "from": "acoustic-model",
+      "to": "tts",
+      "type": "part_of"
+    },
+    {
+      "id": "e-vocoder-part_of-tts",
+      "from": "vocoder",
+      "to": "tts",
+      "type": "part_of"
+    },
+    {
+      "id": "e-hifi-gan-part_of-vocoder",
+      "from": "hifi-gan",
+      "to": "vocoder",
+      "type": "part_of"
+    },
+    {
+      "id": "e-voice-cloning-part_of-tts",
+      "from": "voice-cloning",
+      "to": "tts",
+      "type": "part_of"
+    },
+    {
+      "id": "e-voice-cloning-measured_by-speaker-similarity",
+      "from": "voice-cloning",
+      "to": "speaker-similarity",
+      "type": "measured_by"
+    },
+    {
+      "id": "e-kokoro-part_of-tts",
+      "from": "kokoro",
+      "to": "tts",
+      "type": "part_of"
+    },
+    {
+      "id": "e-orpheus-part_of-tts",
+      "from": "orpheus",
+      "to": "tts",
+      "type": "part_of"
+    },
+    {
+      "id": "e-orpheus-uses-snac",
+      "from": "orpheus",
+      "to": "snac",
+      "type": "uses"
+    },
+    {
+      "id": "e-snac-part_of-neural-audio-codec",
+      "from": "snac",
+      "to": "neural-audio-codec",
+      "type": "part_of"
+    },
+    {
+      "id": "e-fish-speech-part_of-tts",
+      "from": "fish-speech",
+      "to": "tts",
+      "type": "part_of"
+    },
+    {
+      "id": "e-fish-speech-uses-firefly-gan",
+      "from": "fish-speech",
+      "to": "firefly-gan",
+      "type": "uses"
+    },
+    {
+      "id": "e-firefly-gan-part_of-vocoder",
+      "from": "firefly-gan",
+      "to": "vocoder",
+      "type": "part_of"
+    },
+    {
+      "id": "e-chatterbox-part_of-tts",
+      "from": "chatterbox",
+      "to": "tts",
+      "type": "part_of"
+    },
+    {
+      "id": "e-chatterbox-related_to-voice-cloning",
+      "from": "chatterbox",
+      "to": "voice-cloning",
+      "type": "related_to"
+    },
+    {
+      "id": "e-moshi-part_of-speech-to-speech",
+      "from": "moshi",
+      "to": "speech-to-speech",
+      "type": "part_of"
+    },
+    {
+      "id": "e-moshi-uses-mimi",
+      "from": "moshi",
+      "to": "mimi",
+      "type": "uses"
+    },
+    {
+      "id": "e-moshi-uses-full-duplex",
+      "from": "moshi",
+      "to": "full-duplex",
+      "type": "uses"
+    },
+    {
+      "id": "e-mimi-part_of-neural-audio-codec",
+      "from": "mimi",
+      "to": "neural-audio-codec",
+      "type": "part_of"
+    },
+    {
+      "id": "e-canary-part_of-stt",
+      "from": "canary",
+      "to": "stt",
+      "type": "part_of"
+    },
+    {
+      "id": "e-canary-related_to-speech-translation",
+      "from": "canary",
+      "to": "speech-translation",
+      "type": "related_to"
+    },
+    {
+      "id": "e-quantization-part_of-inference-optimization",
+      "from": "quantization",
+      "to": "inference-optimization",
+      "type": "part_of"
+    },
+    {
+      "id": "e-speaker-embedding-cache-part_of-inference-optimization",
+      "from": "speaker-embedding-cache",
+      "to": "inference-optimization",
+      "type": "part_of"
+    },
+    {
+      "id": "e-inference-optimization-part_of-voice-agent",
+      "from": "inference-optimization",
+      "to": "voice-agent",
+      "type": "part_of"
+    },
+    {
+      "id": "e-evaluation-part_of-voice-agent",
+      "from": "evaluation",
+      "to": "voice-agent",
+      "type": "part_of"
+    },
+    {
+      "id": "e-tts-measured_by-pesq",
+      "from": "tts",
+      "to": "pesq",
+      "type": "measured_by"
+    },
+    {
+      "id": "e-evaluation-uses-mos",
+      "from": "evaluation",
+      "to": "mos",
+      "type": "uses"
+    },
+    {
+      "id": "e-evaluation-uses-pesq",
+      "from": "evaluation",
+      "to": "pesq",
+      "type": "uses"
+    },
+    {
+      "id": "e-evaluation-uses-wer",
+      "from": "evaluation",
+      "to": "wer",
+      "type": "uses"
+    },
+    {
+      "id": "e-evaluation-uses-speaker-similarity",
+      "from": "evaluation",
+      "to": "speaker-similarity",
+      "type": "uses"
+    },
+    {
+      "id": "e-fish-audio-related_to-fish-speech",
+      "from": "fish-audio",
+      "to": "fish-speech",
+      "type": "related_to"
+    },
+    {
+      "id": "e-benchmark-related_to-new-node",
+      "from": "benchmark",
+      "to": "new-node",
+      "type": "related_to"
+    },
+    {
+      "id": "e-new-node-part_of-voice-agent",
+      "from": "new-node",
+      "to": "voice-agent",
+      "type": "part_of"
+    },
+    {
+      "id": "e-new-node-part_of-llm",
+      "from": "new-node",
+      "to": "llm",
+      "type": "part_of"
+    },
+    {
+      "id": "e-benchmark-related_to-new-node-2",
+      "from": "benchmark",
+      "to": "new-node-2",
+      "type": "related_to"
+    },
+    {
+      "id": "e-new-node-2-part_of-voice-agent",
+      "from": "new-node-2",
+      "to": "voice-agent",
+      "type": "part_of"
+    },
+    {
+      "id": "e-llm-related_to-new-node-3",
+      "from": "llm",
+      "to": "andromeda",
+      "type": "related_to"
+    },
+    {
+      "id": "e-livekit-related_to-new-node-3",
+      "from": "livekit",
+      "to": "jambonz",
+      "type": "related_to"
+    },
+    {
+      "id": "e-vamos-bench-part_of-benchmark",
+      "from": "vamos-bench",
+      "to": "benchmark",
+      "type": "part_of"
+    },
+    {
+      "id": "e-shadowlm-related_to-llm",
+      "from": "shadowlm",
+      "to": "llm",
+      "type": "related_to"
+    }
+  ]
+}

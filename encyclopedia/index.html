@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Voice Agent Atlas</title>
+    <meta
+      name="description"
+      content="A connected encyclopedia of real-time voice agents: models, providers, concepts and how they fit together."
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="header">
+        <button class="icon-btn menu-btn" id="menuBtn" aria-label="Toggle list">☰</button>
+        <a class="brand" href="#/">
+          <span class="brand-mark">VA</span>
+          <span>Voice Agent Atlas</span>
+          <span class="brand-sub" id="brandSub">encyclopedia</span>
+        </a>
+        <div class="header-spacer"></div>
+        <span class="status-dot edit-only hidden" id="statusDot"></span>
+        <span class="status-text edit-only hidden" id="statusText"></span>
+        <button class="search-trigger" id="searchTrigger">
+          <span>Search the atlas</span>
+          <span style="flex: 1"></span>
+          <kbd>⌘K</kbd>
+        </button>
+        <div class="seg" role="group" aria-label="View">
+          <button id="viewBrowse" aria-pressed="true">Browse</button>
+          <button id="viewGraph" aria-pressed="false">Graph</button>
+        </div>
+        <button class="icon-btn" id="themeBtn" aria-label="Toggle theme">◐</button>
+      </header>
+
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+          <div class="row edit-only hidden" style="gap: 8px">
+            <button class="btn btn-primary" id="newNodeBtn" style="flex: 1; justify-content: center">
+              + New node
+            </button>
+            <button class="btn" id="inboxBtn" title="Unfiled quick captures">
+              Inbox <span id="inboxCount"></span>
+            </button>
+            <button class="btn" id="typesBtn" title="Manage node &amp; relation types">Types</button>
+          </div>
+          <input type="search" id="filterInput" placeholder="Filter nodes…" aria-label="Filter nodes" />
+          <div class="chips" id="typeFilters"></div>
+          <div class="sidebar-meta" id="sidebarMeta"></div>
+        </div>
+        <div class="node-list" id="nodeList"></div>
+      </aside>
+
+      <main class="main" id="main">
+        <div class="content" id="content"></div>
+        <div class="graph-wrap hidden" id="graphWrap">
+          <canvas id="graphCanvas"></canvas>
+          <div class="graph-hint">Drag to move · scroll to zoom · click a node to open it</div>
+          <div class="graph-legend" id="graphLegend"></div>
+        </div>
+      </main>
+    </div>
+
+    <div class="toast-stack" id="toasts"></div>
+
+    <script src="js/graph.js"></script>
+    <script src="js/markdown.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/graphview.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
